@@ -1,0 +1,152 @@
+---
+title: "Module 3 - Assignment"
+output: 
+  learnr::tutorial:
+    progressive: true
+    allow_skip: true
+    df_print: paged
+runtime: shiny_prerendered
+description: >
+  Assignment for Data Management in R module
+---
+
+```{r setup, include=FALSE, message=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(learnr)
+library(tidyverse)
+library(randomNames)
+
+set.seed(1)
+
+Data1 <- data.frame(
+  id  = sample(1:100, size = 100),
+  village_id = sample(1:8, size = 100, replace = TRUE),
+  farmer_name = c(randomNames(50, gender = 0), randomNames(50, gender = 1)),
+  gender = c(sample(c("1", "M", "m", "Male"), 50, replace = TRUE), sample(c("2", "F", "f", "Female"), 50, replace = TRUE)),
+  farm_area = c(sample(seq(from = 2, to = 25, by = 0.4), 99, replace = TRUE), 100),
+  hh_size = sample(c(1:10, -9), size = 100, replace = TRUE),
+  income = sample(c(seq(from = 100, to = 900, by = 60), 0, -9), size = 100, replace = TRUE),
+  costs = sample(c(seq(from = 50, to = 500, by = 20), -9), size = 100, replace = TRUE)
+)
+
+xx <- sample(1:100, 5)
+
+for(i in 1:5){
+  Data1$farmer_name[xx[i]] <- paste0(" ", Data1$farmer_name[xx[i]])
+}
+
+yy <- 1:100
+
+yy <- yy[-xx]
+
+yy <- sample(1:100, 5)
+
+for(i in 1:5){
+  Data1$farmer_name[yy[i]] <- paste0(Data1$farmer_name[yy[i]], " ")
+}
+
+```
+
+## Part 1 - Data Cleaing
+
+### Dataset
+
+To start with you will work on the following data set which contains a number of variables about a list of 100 farmers.
+
+```{r, exercise = FALSE}
+Data1
+```
+
+### Exercise 1a - Trim Whitespace
+
+```{r, exercise = FALSE}
+unique(Data1$farmer_name)
+```
+Exercise 1a: Using `mutate` and `trimws`, remove the whitespace present in the farmer_name column from both the beginning and the ending of the variable entries
+
+```{r ex1a, exercise = TRUE}
+Data1 <- Data1 %>%
+  mutate()
+```
+
+```{r ex1a-solution}
+Data1 <- Data1 %>%
+  mutate(farmer_name = trimws(farmer_name, which = "both"))
+```
+
+
+### Exercise 1b - Missing Data
+
+Exercise 1bi: Use `table` to check which variables in the dataset are still using the missing data code `-9` rather than being explicitly `NA`
+
+```{r ex1bi, exercise = TRUE}
+
+```
+
+Exercise 1bii: Using `mutate` and `na_if`, correct the variables that are still using `-9` so that these are instead coded as `NA`
+
+```{r ex1bii, exercise = TRUE}
+Data1 <- Data1 %>%
+  mutate()
+```
+
+### Exercise 1c - Correcting labels
+
+```{r, exercise = FALSE}
+table(Data1$gender)
+```
+Exercise 1c: Using `mutate` and `case_when`, standardise the gender variable such that
+
+Male, m, M & 1 are all recoded to equal "Male"
+
+Female, f, F & 2 are all recoded to equal "Female"
+
+```{r ex1c, exercise = TRUE}
+Data1 <- Data1 %>%
+  mutate()
+```
+
+### Exercise 1d - Correcting outlier values
+
+```{r}
+hist(Data1$farm_area)
+```
+
+Exercise 1d: Using any method demonstrated in the workbook, correct this implausibly high value of 99 ha to the correct value of 9 hectares.
+
+```{r ex1d, exercise = TRUE}
+
+```
+
+### Exercise 1e - Creating a new variable
+
+
+Exercise 1e: Using `mutate` create a new variable called `gross_income` which is the income minus the costs.
+
+```{r}
+
+```
+
+### Ecercise 1f - Sorting data
+
+Exercise 1f: Using `arrange`, sort the data using the id variable so that the rows are in order from 1 to 100 by id.
+
+```{r}
+
+```
+
+
+## Part 2 - Data Reshaping
+
+### Exercise 2a - Pivot longer
+
+### Exercise 2b - Pivot wider
+
+## Part 3 - Data Merging
+
+### Exercise 3a - Binding
+
+### Exercise 3b - Summarising
+
+### Exercise 3c - Joining data
