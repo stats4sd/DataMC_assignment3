@@ -19,12 +19,12 @@ library(randomNames)
 
 set.seed(1)
 
-Data1 <- data.frame(
+farmer_data <- data.frame(
   id  = sample(1:100, size = 100),
   village_id = sample(1:8, size = 100, replace = TRUE),
-  farmer_name = c(randomNames(50, gender = 0), randomNames(50, gender = 1)),
-  gender = c(sample(c("1", "M", "m", "Male"), 50, replace = TRUE), sample(c("2", "F", "f", "Female"), 50, replace = TRUE)),
-  farm_area = c(sample(seq(from = 2, to = 25, by = 0.4), 99, replace = TRUE), 100),
+  farmer.name = c(randomNames(50, gender = 0, which.names = "first"), randomNames(50, gender = 1, which.names = "first")),
+  sex = c(sample(c("1", "M", "m", "Male"), 50, replace = TRUE), sample(c("2", "F", "f", "Female"), 50, replace = TRUE)),
+  age = c(sample(seq(from = 18, to = 65, by = 1), 99, replace = TRUE), 100),
   hh_size = sample(c(1:10, -9), size = 100, replace = TRUE),
   income = sample(c(seq(from = 100, to = 900, by = 60), 0, -9), size = 100, replace = TRUE),
   costs = sample(c(seq(from = 50, to = 500, by = 20), -9), size = 100, replace = TRUE)
@@ -33,7 +33,7 @@ Data1 <- data.frame(
 xx <- sample(1:100, 5)
 
 for(i in 1:5){
-  Data1$farmer_name[xx[i]] <- paste0(" ", Data1$farmer_name[xx[i]])
+  farmer_data$farmer.name[xx[i]] <- paste0(" ", farmer_data$farmer.name[xx[i]])
 }
 
 yy <- 1:100
@@ -43,105 +43,296 @@ yy <- yy[-xx]
 yy <- sample(1:100, 5)
 
 for(i in 1:5){
-  Data1$farmer_name[yy[i]] <- paste0(Data1$farmer_name[yy[i]], " ")
+  farmer_data$farmer.name[yy[i]] <- paste0(farmer_data$farmer.name[yy[i]], " ")
 }
 
 ```
 
-## Part 1 - Data Cleaing
+## Part 1 - Data Cleaning
 
 ### Dataset
 
 To start with you will work on the following data set which contains a number of variables about a list of 100 farmers.
 
 ```{r, exercise = FALSE}
-Data1
+farmer_data
 ```
 
 ### Exercise 1a - Trim Whitespace
 
-```{r, exercise = FALSE}
-unique(Data1$farmer_name)
-```
-Exercise 1a: Using `mutate` and `trimws`, remove the whitespace present in the farmer_name column from both the beginning and the ending of the variable entries
+Something you may have noticed in the by looking at the table of data above is that it look like there may have been some white space at the start of some of our farmers names. It is quite possible that there may have been some at the end to those this is hard to spot.
+
+Let's perform a check by using the `unique` function to look at all the unique values for name
+
+    ```{r, exercise = FALSE}
+    unique(farmer_data$farmer.name)
+    ```
+
+Seems our suspicions were correct, we have around 10 values for name that have either a leading or trailing space in them.
+
+Exercise 1a: Using `mutate` and `trimws`, remove the whitespace present in the farmer.name column from both the beginning and the ending of the variable entries
 
 ```{r ex1a, exercise = TRUE}
-Data1 <- Data1 %>%
+farmer_data <- farmer_data %>%
   mutate()
 ```
 
 ```{r ex1a-solution}
-Data1 <- Data1 %>%
-  mutate(farmer_name = trimws(farmer_name, which = "both"))
+farmer_data <- farmer_data %>%
+  mutate(farmer.name = trimws(farmer.name, which = "both"))
 ```
-
 
 ### Exercise 1b - Missing Data
 
-Exercise 1bi: Use `table` to check which variables in the dataset are still using the missing data code `-9` rather than being explicitly `NA`
+Recall that in R we need to be very explicit when it comes to defining data. It **MUST** be coded as `NA`
+
+In our dataset, we have unfortunately not told R explicitly what our missing data codes were when we imported the data. Therefore, there are a few variable which have some values equalling -9. However this was a missing data code, but R will see this value as literally -9.
+
+Let's check first which variables this issue applies to.
+
+Exercise 1bi: Use `summary` to check which continuous variables in the dataset are still using the missing data code `-9` rather than being explicitly `NA`. Note that -9 will be the minimum value in each of these cases.
 
 ```{r ex1bi, exercise = TRUE}
 
 ```
 
+```{r ex1bi-solution}
+summary(farmer_data)
+
+# Should have found that at least 1 value in each of hh_size, income and costs were equal to -9
+```
+
+You should have identified a few variables unfortunately using this code.
+
 Exercise 1bii: Using `mutate` and `na_if`, correct the variables that are still using `-9` so that these are instead coded as `NA`
 
 ```{r ex1bii, exercise = TRUE}
-Data1 <- Data1 %>%
+farmer_data <- farmer_data %>%
   mutate()
+```
+
+```{r ex1bii-solution}
+farmer_data <- farmer_data %>%
+  mutate(hh_size = na_if(hh_size, -9),
+         income = na_if(income, -9),
+         costs = na_if(costs, -9))
+
+# OR
+
+farmer_data <- farmer_data %>%
+  mutate_all(na_if, -9)
+
+#This would only be useful if -9 will ALWAYS be a missing code and never a true value of a variable
+
+#Recommend looking into mutate_at or mutate_if to see how you can make the same edit across multiple but not all columns
 ```
 
 ### Exercise 1c - Correcting labels
 
+Now something else looked off about our sex variable. Let's use `unique` to have a look at all of the unique values of sex
+
 ```{r, exercise = FALSE}
-table(Data1$gender)
+unique(farmer_data$sex)
 ```
-Exercise 1c: Using `mutate` and `case_when`, standardise the gender variable such that
 
-Male, m, M & 1 are all recoded to equal "Male"
+Hmm, seems we have multiple values to mean the same thing unfortunately. Male and Female have both been coded four different ways each.
 
-Female, f, F & 2 are all recoded to equal "Female"
+Exercise 1c: Using `mutate` and `case_when`, standardise the sex variable such that
+
+Male, m, M & "1" are all recoded to equal "Male"
+
+Female, f, F & "2" are all recoded to equal "Female"
+
+**Hint** Think back to how we used the `%in%` operator
 
 ```{r ex1c, exercise = TRUE}
-Data1 <- Data1 %>%
+farmer_data <- farmer_data %>%
   mutate()
+```
+
+```{r ex1c-solution}
+farmer_data <- farmer_data %>%
+  mutate(sex = case_when(
+    sex %in% c("Male", "m", "M", "1") ~ "Male",
+    sex %in% c("Female", "f", "F", "2") ~ "Female"
+  ))
 ```
 
 ### Exercise 1d - Correcting outlier values
 
+Let's use a histogram to inspect one of our continuous variables for possible data entry errors
+
 ```{r}
-hist(Data1$farm_area)
+hist(farmer_data$age)
 ```
 
-Exercise 1d: Using any method demonstrated in the workbook, correct this implausibly high value of 99 ha to the correct value of 9 hectares.
+Looks like we have one implausibly high outlying value for age.
+
+Upon contacting the enumerator who collected data for this farmer, you find the true value was meant to be 18 years It was just inputted wrongly.
+
+Exercise 1d: Using any method demonstrated in the workbook, correct this implausibly high value of 180 years old to the correct value of 18 years old.
 
 ```{r ex1d, exercise = TRUE}
 
 ```
 
+```{r ex1d-solution}
+farmer_data$age[farmer_data$age == 180] <- 19
+
+#OR
+
+farmer_data <- farmer_data%>%
+  mutate(age = ifelse(age == 180, 18, age))
+```
+
 ### Exercise 1e - Creating a new variable
 
+As part of the data analysis plan you notice that part of the analysis will include an evaluation of the gross income of farmers, a calculation of income minus costs. However, you find this was not calculated directly as part of the data collection.
 
 Exercise 1e: Using `mutate` create a new variable called `gross_income` which is the income minus the costs.
 
-```{r}
+```{r ex1e, exercise = TRUE}
 
 ```
 
-### Ecercise 1f - Sorting data
+```{r ex1e-solution}
+farmer_data <- farmer_data%>%
+  mutate(gross_income = income-costs)
+```
+
+### Exercise 1f - Sorting data
+
+Finally, you may have noticed that there is currently no particular order to our data. While not mandatory, sorting data can be useful for presentation, readability and help users easily find certain pieces of information.
+
+We have a natural sorting variable in our unique identifier "id"
 
 Exercise 1f: Using `arrange`, sort the data using the id variable so that the rows are in order from 1 to 100 by id.
 
-```{r}
+```{r ex1f, exercise = TRUE}
 
 ```
 
+```{r ex1f-solution}
+farmer_data <- farmer_data%>%
+  arrange(id)
+```
+
+```{r, echo = FALSE}
+Data <- farmer_data%>%
+  mutate(farmer.name = trimws(farmer.name, which = "both"),
+         hh_size = na_if(hh_size, -9),
+         income = na_if(income, -9),
+         costs = na_if(costs, -9),
+         sex = case_when(
+    sex %in% c("Male", "m", "M", "1") ~ "Male",
+    sex %in% c("Female", "f", "F", "2") ~ "Female"
+  ),
+  age = ifelse(age == 180, 18, age),
+  gross_income = income-costs)%>%
+  arrange(id)
+```
 
 ## Part 2 - Data Reshaping
 
+```{r, echo = FALSE}
+set.seed(1)
+
+plot_data <- data.frame(
+  id = 1:300,
+  farmer_id = sample(1:100, 300, replace = TRUE),
+  area = sample(seq(from = 0.4, to = 8, by = 0.4), 300, replace = TRUE),
+  pesticides = sample(0:1, 300, replace = TRUE),
+  fertilisers = sample(0:1, 300, replace = TRUE)
+)
+
+plot_data <- plot_data%>%
+  group_by(farmer_id)%>%
+  mutate(plot_num = row_number())
+
+plot_data <- pivot_wider(plot_data,
+            id_cols = farmer_id,
+            names_from = plot_num,
+            values_from = c(id, area:fertilisers),
+            names_sep = "_")
+```
+
+```{r, echo = FALSE}
+village_data <- data.frame(
+  id = rep(c(1:8),3),
+  name = rep(c("A","B","C","D","E","F","G","H"),3),
+  information = c(rep("population", 8), rep("ngo_supported",8), rep("weight",8))
+)
+
+for(i in 1:nrow(village_data)){
+  village_data$value[i] <- ifelse(
+    village_data$information[i] == "population", sample(1500:10000,size = 1),
+    ifelse(village_data$information[i] == "ngo_supported", sample(c("Yes", "No")), 
+           sample(seq(0.02,1.98, by = 0.02)))
+    )
+}
+```
+
+### Datasets
+
+To test your skills in pivoting data we first have some additional data for our project, but this data is all at the plot level. But unfortunately this has been provided to us at the farmer level and not at the plot level.
+
+Therefore we have **8** columns housing our plot id numbers. Most of which end up being mostly `NA` because few farmers will have this many.
+
+```{r, exercise = FALSE}
+plot_data
+```
+
+```{r,echo = FALSE}
+plot_data <- plot_data%>%ungroup()
+```
+
+Secondly, you have been provided by an outside source with some data about the villages that have been used in this project. However, it has unfortunately been passed along in long format with individual rows for the villages' population, sampling weights and whether or not they recieved support from an NGO.
+
+```{r}
+village_data
+```
+
 ### Exercise 2a - Pivot longer
 
+Firstly, let's get our plot data into a more useful shape. When conducting analysis it will be much simpler to keep comparable information into the same column. i.e keep all values for the area of plot in just the single column.
+
+Exercise 2a: Using `pivot_longer` reshape the wide plot data into a new long data set, save this output as `plot_data_long`. 
+
+**Hint**: If you are stuck at all, look back at the session 2 workbook and how we utilised the special string of `".value"`
+
+```{r ex2a, exercise = TRUE}
+plot_data_long <- plot_data%>%
+  pivot_longer()
+```
+
+```{r ex2a-solution}
+plot_data_long <-plot_data%>%
+  pivot_longer(
+    cols = id_1:fertilisers_8,
+    names_to = c(".value", "plot_num"),
+    names_sep = "_",
+  )
+```
+
+
 ### Exercise 2b - Pivot wider
+
+Next let's do the opposite to that village data.
+
+Exercise 2b: Using `pivot_wider`, transform the data into wide format such that you only have one row per village. Save this to a new objecct titled `village_data_wide`
+
+```{r ex2b, exercise = TRUE}
+village_data_wide <- village_data%>%
+  pivot_wider()
+```
+
+```{r ex2b-soultion}
+village_data_wide <- village_data%>%
+  pivot_wider(
+    names_from = information,
+    values_from = value
+  )
+```
 
 ## Part 3 - Data Merging
 
