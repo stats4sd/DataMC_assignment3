@@ -72,9 +72,13 @@ Seems our suspicions were correct, we have around 10 values for name that have e
 
 Exercise 1a: Using `mutate` and `trimws`, remove the whitespace present in the farmer.name column from both the beginning and the ending of the variable entries
 
+**REMEMBER** You can inspect the results of your changes at any time by writing the name of the data frame into the code chunk at any time
+
 ```{r ex1a, exercise = TRUE}
 farmer_data <- farmer_data %>%
   mutate()
+
+farmer_data
 ```
 
 ```{r ex1a-solution}
@@ -218,7 +222,7 @@ farmer_data <- farmer_data%>%
 ```
 
 ```{r, echo = FALSE}
-Data <- farmer_data%>%
+farmer_data <- farmer_data%>%
   mutate(farmer.name = trimws(farmer.name, which = "both"),
          hh_size = na_if(hh_size, -9),
          income = na_if(income, -9),
@@ -278,15 +282,15 @@ To test your skills in pivoting data we first have some additional data for our 
 
 Therefore we have **8** columns housing our plot id numbers. Most of which end up being mostly `NA` because few farmers will have this many.
 
+```{r,echo = FALSE}
+plot_data <- plot_data
+```
+
 ```{r, exercise = FALSE}
 plot_data
 ```
 
-```{r,echo = FALSE}
-plot_data <- plot_data%>%ungroup()
-```
-
-Secondly, you have been provided by an outside source with some data about the villages that have been used in this project. However, it has unfortunately been passed along in long format with individual rows for the villages' population, sampling weights and whether or not they recieved support from an NGO.
+Secondly, you have been provided by an outside source with some data about the villages that have been used in this project. However, it has unfortunately been passed along in long format with individual rows for the villages' population, sampling weights and whether or not they received support from an NGO.
 
 ```{r}
 village_data
@@ -296,13 +300,18 @@ village_data
 
 Firstly, let's get our plot data into a more useful shape. When conducting analysis it will be much simpler to keep comparable information into the same column. i.e keep all values for the area of plot in just the single column.
 
-Exercise 2a: Using `pivot_longer` reshape the wide plot data into a new long data set, save this output as `plot_data_long`. 
+Exercise 2a: Using `pivot_longer` reshape the wide plot data into a new long data set, save this output as `plot_data_long` and call the new variable, that will list the plot number within a farmer, "plot_num". 
 
-**Hint**: If you are stuck at all, look back at the session 2 workbook and how we utilised the special string of `".value"`
+Please include the `values_drop_na = TRUE` argument into your answer. This will stop unnecessary rows being created for where all variables will be `NA`. In other words, all farmers will only have as many rows as they will plots.
+
+**Hint**: If you are stuck at all, look back at the session 2 workbook and how we utilised the special string of `".value"`.
 
 ```{r ex2a, exercise = TRUE}
-plot_data_long <- plot_data%>%
-  pivot_longer()
+plot_data_long <-plot_data%>%
+  pivot_longer(
+    ,
+    values_drop_na = TRUE
+  )
 ```
 
 ```{r ex2a-solution}
@@ -311,6 +320,7 @@ plot_data_long <-plot_data%>%
     cols = id_1:fertilisers_8,
     names_to = c(".value", "plot_num"),
     names_sep = "_",
+    values_drop_na = TRUE
   )
 ```
 
@@ -319,14 +329,14 @@ plot_data_long <-plot_data%>%
 
 Next let's do the opposite to that village data.
 
-Exercise 2b: Using `pivot_wider`, transform the data into wide format such that you only have one row per village. Save this to a new objecct titled `village_data_wide`
+Exercise 2b: Using `pivot_wider`, transform the data into wide format such that you only have one row per village. Save this to a new object titled `village_data_wide`
 
 ```{r ex2b, exercise = TRUE}
 village_data_wide <- village_data%>%
   pivot_wider()
 ```
 
-```{r ex2b-soultion}
+```{r ex2b-solution}
 village_data_wide <- village_data%>%
   pivot_wider(
     names_from = information,
@@ -336,8 +346,125 @@ village_data_wide <- village_data%>%
 
 ## Part 3 - Data Merging
 
+```{r, echo = FALSE}
+set.seed(1)
+
+farmer_data_additional <- data.frame(
+  id  = 101:120,
+  village_id = sample(1:8, size = 20, replace = TRUE),
+  farmer.name = c(randomNames(10, gender = 0, which.names = "first"), randomNames(10, gender = 1, which.names = "first")),
+  sex = c(rep("Male", 10), rep("Female", 10)),
+  age = c(sample(seq(from = 18, to = 65, by = 1), 20, replace = TRUE)),
+  hh_size = sample(1:10, size = 20, replace = TRUE),
+  income = sample(c(seq(from = 100, to = 900, by = 60), 0), size = 20, replace = TRUE),
+  costs = sample(seq(from = 50, to = 500, by = 20), size = 20, replace = TRUE)
+)
+
+plot_data_additional <- data.frame(
+  farmer_id = sample(101:120, size = 45, replace = TRUE),
+  id = 301:345,
+    area = sample(seq(from = 0.4, to = 8, by = 0.4), 45, replace = TRUE),
+  pesticides = sample(0:1, 45, replace = TRUE),
+  fertilisers = sample(0:1, 45, replace = TRUE)
+)
+
+plot_data_additional <- plot_data_additional%>%
+  group_by(farmer_id)%>%
+  mutate(plot_num = as.character(row_number()))%>%
+  arrange(farmer_id, plot_num)
+```
+
+### Datasets
+
+For the first exercise of this final section, we are going to bind our previous data sets with some additional observations for our farmers and plots. 20 new farmers with 45 plots between them.
+
+```{r}
+farmer_data_additional
+```
+
+```{r}
+plot_data_additional
+```
+
 ### Exercise 3a - Binding
+
+As the datasets for our additional data sets use the same formats that we have developed and our tidied up already. We can move straight to appending them onto our existing data frames.
+
+**HINT** For the following steps to work you should have the following dimensions for your data frames
+
+plot_data_long = 300 rows and 6 columns
+
+farmer_data = 100 rows and 9 variables
+
+Please use run the following code chunk to check the dimensions of your data
+
+The first number will be the number of rows, the second is the number of columns
+
+```{r ex3z, exercise = TRUE}
+dim(plot_data_long)
+
+dim(farmer_data)
+```
+
+Exercise 3a: Using `bind_rows`, append on the new observations to farmer_data and plot_data_long.
+
+```{r ex3a, exercise = TRUE}
+farmer_data_full <- 
+  
+plot_data_full
+```
+
+```{r ex3a-solution}
+farmer_data_full <- bind_rows(farmer_data, farmer_data_additional)
+
+plot_data_full <- bind_rows(plot_data_long, plot_data_additional)
+```
+
+You can use the following code chunk to see if you now have as many rows as you should expect.
+
+```{r ex3y, exercise = TRUE}
+dim(plot_data_full)
+
+dim(farmer_data_full)
+```
 
 ### Exercise 3b - Summarising
 
+Now we will move onto first summarising some data from a lower level to then then join it up with data at a higher level.
+
+So as part of our data analysis plan we need a total farm area which is the sum of the individual plot areas for each individual farmer. We then want to merge this with our farmer data set.
+
+Exercise 3b: Using `group_by` and `summarise`, create a new data set which is a summary of the plot level data. Call this `plot_data_summary`. Create summary variables for the total area of a farmer's plots using `sum` and then also create a variable which counts the number of plots a farmer owns.
+
+```{r ex3b, exercise = TRUE}
+plot_data_summary <- plot_data_full%>%
+```
+
+```{r ex3b-solution}
+plot_data_summary <- plot_data_full%>%
+  group_by(farmer_id)%>%
+  summarise(total_area = sum(area, na.rm = TRUE),
+            nplots = n())
+```
+
 ### Exercise 3c - Joining data
+
+Join the plot_data_summary data set onto the farmer_data_full dataset. Now we actually have a few farmers who we have no plot data available. We have made the decision for analysis that we only want farmers who own at least one plot.
+
+Exercise 3c: Using a type of join that will only keep the farmers who have plot data that they can be matched to, join plot_data_summary onto farmer_data_full. 
+
+**HINT** Remember that you can use `c()` to match variables where they have different names in the two datasets
+
+```{r ex3c, exercise = TRUE}
+farmer_data_full <- 
+```
+
+```{r ex3c-solution}
+farmer_data_full <- inner_join(
+  farmer_data_full, plot_data_summary, by = c("id" = "farmer_id")
+)
+```
+
+Thank you for completing this assignment.
+
+Please now go to the Module 3 quiz where you will be asked a couple questions about the assignment. This quiz will be used to mark completion of the module. Once you have completed the quiz, you can expect to receive your certificate within a few working days.
