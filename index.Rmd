@@ -22,9 +22,9 @@ set.seed(1)
 farmer_data <- data.frame(
   id  = sample(1:100, size = 100),
   village_id = sample(1:8, size = 100, replace = TRUE),
-  farmer.name = c(randomNames(50, gender = 0, which.names = "first"), randomNames(50, gender = 1, which.names = "first")),
+  name = c(randomNames(50, gender = 0, which.names = "first"), randomNames(50, gender = 1, which.names = "first")),
   sex = c(sample(c("1", "M", "m", "Male"), 50, replace = TRUE), sample(c("2", "F", "f", "Female"), 50, replace = TRUE)),
-  age = c(sample(seq(from = 18, to = 65, by = 1), 99, replace = TRUE), 100),
+  age = c(sample(seq(from = 18, to = 65, by = 1), 99, replace = TRUE), 180),
   hh_size = sample(c(1:10, -9), size = 100, replace = TRUE),
   income = sample(c(seq(from = 100, to = 900, by = 60), 0, -9), size = 100, replace = TRUE),
   costs = sample(c(seq(from = 50, to = 500, by = 20), -9), size = 100, replace = TRUE)
@@ -33,7 +33,7 @@ farmer_data <- data.frame(
 xx <- sample(1:100, 5)
 
 for(i in 1:5){
-  farmer_data$farmer.name[xx[i]] <- paste0(" ", farmer_data$farmer.name[xx[i]])
+  farmer_data$name[xx[i]] <- paste0(" ", farmer_data$name[xx[i]])
 }
 
 yy <- 1:100
@@ -43,8 +43,102 @@ yy <- yy[-xx]
 yy <- sample(1:100, 5)
 
 for(i in 1:5){
-  farmer_data$farmer.name[yy[i]] <- paste0(farmer_data$farmer.name[yy[i]], " ")
+  farmer_data$name[yy[i]] <- paste0(farmer_data$name[yy[i]], " ")
 }
+
+plot_data <- data.frame(
+  id = 1:300,
+  farmer_id = sample(1:100, 300, replace = TRUE),
+  area = sample(seq(from = 0.4, to = 8, by = 0.4), 300, replace = TRUE),
+  pesticides = sample(0:1, 300, replace = TRUE),
+  fertilisers = sample(0:1, 300, replace = TRUE)
+)
+
+plot_data <- plot_data%>%
+  group_by(farmer_id)%>%
+  mutate(plot_num = row_number())
+
+plot_data <- pivot_wider(plot_data,
+            id_cols = farmer_id,
+            names_from = plot_num,
+            values_from = c(id, area:fertilisers),
+            names_sep = "_")
+
+village_data <- data.frame(
+  id = rep(c(1:8),3),
+  name = rep(c("A","B","C","D","E","F","G","H"),3),
+  information = c(rep("population", 8), rep("ngo_supported",8), rep("weight",8))
+)
+
+for(i in 1:nrow(village_data)){
+  village_data$value[i] <- ifelse(
+    village_data$information[i] == "population", sample(1500:10000,size = 1),
+    ifelse(village_data$information[i] == "ngo_supported", sample(c("Yes", "No")), 
+           sample(seq(0.02,1.98, by = 0.02)))
+    )
+}
+
+farmer_data_additional <- data.frame(
+  id  = 101:120,
+  village_id = sample(1:8, size = 20, replace = TRUE),
+  name = c(randomNames(10, gender = 0, which.names = "first"), randomNames(10, gender = 1, which.names = "first")),
+  sex = c(rep("Male", 10), rep("Female", 10)),
+  age = c(sample(seq(from = 18, to = 65, by = 1), 20, replace = TRUE)),
+  hh_size = sample(1:10, size = 20, replace = TRUE),
+  income = sample(c(seq(from = 100, to = 900, by = 60), 0), size = 20, replace = TRUE),
+  costs = sample(seq(from = 50, to = 500, by = 20), size = 20, replace = TRUE)
+)
+
+farmer_data_additional$gross_income = farmer_data_additional$income - farmer_data_additional$costs
+
+plot_data_additional <- data.frame(
+  farmer_id = sample(101:120, size = 45, replace = TRUE),
+  id = 301:345,
+    area = sample(seq(from = 0.4, to = 8, by = 0.4), 45, replace = TRUE),
+  pesticides = sample(0:1, 45, replace = TRUE),
+  fertilisers = sample(0:1, 45, replace = TRUE)
+)
+
+plot_data_additional <- plot_data_additional%>%
+  group_by(farmer_id)%>%
+  mutate(plot_num = as.character(row_number()))%>%
+  arrange(farmer_id, plot_num)
+
+plot_data_long <-plot_data%>%
+  pivot_longer(
+    cols = id_1:fertilisers_8,
+    names_to = c(".value", "plot_num"),
+    names_sep = "_",
+    values_drop_na = TRUE
+  )
+
+village_data_wide <- village_data%>%
+  pivot_wider(
+    names_from = information,
+    values_from = value
+  )
+
+farmer_data_full <- bind_rows(farmer_data, farmer_data_additional)
+
+plot_data_full <- bind_rows(plot_data_long, plot_data_additional)
+
+farmer_data_clean <- farmer_data%>%
+  mutate(name = trimws(name, which = "both"),
+         hh_size = na_if(hh_size, -9),
+         income = na_if(income, -9),
+         costs = na_if(costs, -9),
+         sex = case_when(
+    sex %in% c("Male", "m", "M", "1") ~ "Male",
+    sex %in% c("Female", "f", "F", "2") ~ "Female"
+  ),
+  age = ifelse(age == 180, 18, age),
+  gross_income = income-costs)%>%
+  arrange(id)
+
+plot_data_summary <- plot_data_full%>%
+  group_by(farmer_id)%>%
+  summarise(total_area = sum(area, na.rm = TRUE),
+            nplots = n())
 
 ```
 
@@ -52,7 +146,7 @@ for(i in 1:5){
 
 ### Dataset
 
-To start with you will work on the following data set which contains a number of variables about a list of 100 farmers.
+To start with you will work on the following data set which contains a number of variables for a list of 100 farmers.
 
 ```{r, exercise = FALSE}
 farmer_data
@@ -60,17 +154,17 @@ farmer_data
 
 ### Exercise 1a - Trim Whitespace
 
-Something you may have noticed in the by looking at the table of data above is that it look like there may have been some white space at the start of some of our farmers names. It is quite possible that there may have been some at the end to those this is hard to spot.
+Let's start by checking for any whitespace, i suspect there may be some in our name column.
 
 Let's perform a check by using the `unique` function to look at all the unique values for name
 
-    ```{r, exercise = FALSE}
-    unique(farmer_data$farmer.name)
-    ```
+```{r, exercise = FALSE}
+unique(farmer_data$name)
+```
 
 Seems our suspicions were correct, we have around 10 values for name that have either a leading or trailing space in them.
 
-Exercise 1a: Using `mutate` and `trimws`, remove the whitespace present in the farmer.name column from both the beginning and the ending of the variable entries
+Exercise 1a: Using `mutate` and `trimws`, remove the whitespace present in the name column from both the beginning and the ending of the variable entries
 
 **REMEMBER** You can inspect the results of your changes at any time by writing the name of the data frame into the code chunk at any time
 
@@ -78,19 +172,21 @@ Exercise 1a: Using `mutate` and `trimws`, remove the whitespace present in the f
 farmer_data <- farmer_data %>%
   mutate()
 
-farmer_data
+unique(farmer_data$name)
 ```
 
 ```{r ex1a-solution}
 farmer_data <- farmer_data %>%
-  mutate(farmer.name = trimws(farmer.name, which = "both"))
+  mutate(name = trimws(name, which = "both"))
+
+unique(farmer_data$name)
 ```
 
 ### Exercise 1b - Missing Data
 
 Recall that in R we need to be very explicit when it comes to defining data. It **MUST** be coded as `NA`
 
-In our dataset, we have unfortunately not told R explicitly what our missing data codes were when we imported the data. Therefore, there are a few variable which have some values equalling -9. However this was a missing data code, but R will see this value as literally -9.
+In our dataset, we have unfortunately not told R explicitly what our missing data codes were when we imported the data. Therefore, there are a few variables which have some values equalling -9. However this was a missing data code, but R will see this value as literally -9.
 
 Let's check first which variables this issue applies to.
 
@@ -98,10 +194,13 @@ Exercise 1bi: Use `summary` to check which continuous variables in the dataset a
 
 ```{r ex1bi, exercise = TRUE}
 
+
 ```
 
 ```{r ex1bi-solution}
 summary(farmer_data)
+
+farmer_data
 
 # Should have found that at least 1 value in each of hh_size, income and costs were equal to -9
 ```
@@ -113,6 +212,8 @@ Exercise 1bii: Using `mutate` and `na_if`, correct the variables that are still 
 ```{r ex1bii, exercise = TRUE}
 farmer_data <- farmer_data %>%
   mutate()
+
+summary(farmer_data)
 ```
 
 ```{r ex1bii-solution}
@@ -121,10 +222,14 @@ farmer_data <- farmer_data %>%
          income = na_if(income, -9),
          costs = na_if(costs, -9))
 
+summary(farmer_data)
+
 # OR
 
 farmer_data <- farmer_data %>%
   mutate_all(na_if, -9)
+
+summary(farmer_data)
 
 #This would only be useful if -9 will ALWAYS be a missing code and never a true value of a variable
 
@@ -160,6 +265,8 @@ farmer_data <- farmer_data %>%
     sex %in% c("Male", "m", "M", "1") ~ "Male",
     sex %in% c("Female", "f", "F", "2") ~ "Female"
   ))
+
+table(farmer_data$sex)
 ```
 
 ### Exercise 1d - Correcting outlier values
@@ -179,6 +286,13 @@ Exercise 1d: Using any method demonstrated in the workbook, correct this implaus
 ```{r ex1d, exercise = TRUE}
 
 ```
+
+Remember you can use the histogram to again plot the value and check your changes
+
+```{r ex1db, exercise = TRUE}
+hist(farmer_data$age)
+```
+
 
 ```{r ex1d-solution}
 farmer_data$age[farmer_data$age == 180] <- 19
@@ -202,6 +316,8 @@ Exercise 1e: Using `mutate` create a new variable called `gross_income` which is
 ```{r ex1e-solution}
 farmer_data <- farmer_data%>%
   mutate(gross_income = income-costs)
+
+farmer_data$gross_income
 ```
 
 ### Exercise 1f - Sorting data
@@ -223,7 +339,7 @@ farmer_data <- farmer_data%>%
 
 ```{r, echo = FALSE}
 farmer_data <- farmer_data%>%
-  mutate(farmer.name = trimws(farmer.name, which = "both"),
+  mutate(name = trimws(name, which = "both"),
          hh_size = na_if(hh_size, -9),
          income = na_if(income, -9),
          costs = na_if(costs, -9),
@@ -238,55 +354,13 @@ farmer_data <- farmer_data%>%
 
 ## Part 2 - Data Reshaping
 
-```{r, echo = FALSE}
-set.seed(1)
-
-plot_data <- data.frame(
-  id = 1:300,
-  farmer_id = sample(1:100, 300, replace = TRUE),
-  area = sample(seq(from = 0.4, to = 8, by = 0.4), 300, replace = TRUE),
-  pesticides = sample(0:1, 300, replace = TRUE),
-  fertilisers = sample(0:1, 300, replace = TRUE)
-)
-
-plot_data <- plot_data%>%
-  group_by(farmer_id)%>%
-  mutate(plot_num = row_number())
-
-plot_data <- pivot_wider(plot_data,
-            id_cols = farmer_id,
-            names_from = plot_num,
-            values_from = c(id, area:fertilisers),
-            names_sep = "_")
-```
-
-```{r, echo = FALSE}
-village_data <- data.frame(
-  id = rep(c(1:8),3),
-  name = rep(c("A","B","C","D","E","F","G","H"),3),
-  information = c(rep("population", 8), rep("ngo_supported",8), rep("weight",8))
-)
-
-for(i in 1:nrow(village_data)){
-  village_data$value[i] <- ifelse(
-    village_data$information[i] == "population", sample(1500:10000,size = 1),
-    ifelse(village_data$information[i] == "ngo_supported", sample(c("Yes", "No")), 
-           sample(seq(0.02,1.98, by = 0.02)))
-    )
-}
-```
-
 ### Datasets
 
-To test your skills in pivoting data we first have some additional data for our project, but this data is all at the plot level. But unfortunately this has been provided to us at the farmer level and not at the plot level.
+Before we test your skills in pivoting data, let’s look at some additional data we have for this project. It is at the level of the plot while our previous dataset was at the level of the farmer. 
 
-Therefore we have **8** columns housing our plot id numbers. Most of which end up being mostly `NA` because few farmers will have this many.
+Each farmer can have up to 8 plots, they are labelled id_1, id_2 and so on. You will notice that many of the values in these columns are NA as the farmers do not all have this many plots.`
 
-```{r,echo = FALSE}
-plot_data <- plot_data
-```
-
-```{r, exercise = FALSE}
+```{r}
 plot_data
 ```
 
@@ -306,10 +380,11 @@ Please include the `values_drop_na = TRUE` argument into your answer. This will 
 
 **Hint**: If you are stuck at all, look back at the session 2 workbook and how we utilised the special string of `".value"`.
 
+**HINT** For the following steps you can use `dim()` to check the number of rows and columns in your data to make sure you have the right amount.
+
 ```{r ex2a, exercise = TRUE}
 plot_data_long <-plot_data%>%
   pivot_longer(
-    ,
     values_drop_na = TRUE
   )
 ```
@@ -322,6 +397,10 @@ plot_data_long <-plot_data%>%
     names_sep = "_",
     values_drop_na = TRUE
   )
+
+plot_data_long
+
+dim(plot_data_long)
 ```
 
 
@@ -330,6 +409,8 @@ plot_data_long <-plot_data%>%
 Next let's do the opposite to that village data.
 
 Exercise 2b: Using `pivot_wider`, transform the data into wide format such that you only have one row per village. Save this to a new object titled `village_data_wide`
+
+
 
 ```{r ex2b, exercise = TRUE}
 village_data_wide <- village_data%>%
@@ -342,37 +423,13 @@ village_data_wide <- village_data%>%
     names_from = information,
     values_from = value
   )
+
+village_data_wide
+
+dim(village_data_wide)
 ```
 
 ## Part 3 - Data Merging
-
-```{r, echo = FALSE}
-set.seed(1)
-
-farmer_data_additional <- data.frame(
-  id  = 101:120,
-  village_id = sample(1:8, size = 20, replace = TRUE),
-  farmer.name = c(randomNames(10, gender = 0, which.names = "first"), randomNames(10, gender = 1, which.names = "first")),
-  sex = c(rep("Male", 10), rep("Female", 10)),
-  age = c(sample(seq(from = 18, to = 65, by = 1), 20, replace = TRUE)),
-  hh_size = sample(1:10, size = 20, replace = TRUE),
-  income = sample(c(seq(from = 100, to = 900, by = 60), 0), size = 20, replace = TRUE),
-  costs = sample(seq(from = 50, to = 500, by = 20), size = 20, replace = TRUE)
-)
-
-plot_data_additional <- data.frame(
-  farmer_id = sample(101:120, size = 45, replace = TRUE),
-  id = 301:345,
-    area = sample(seq(from = 0.4, to = 8, by = 0.4), 45, replace = TRUE),
-  pesticides = sample(0:1, 45, replace = TRUE),
-  fertilisers = sample(0:1, 45, replace = TRUE)
-)
-
-plot_data_additional <- plot_data_additional%>%
-  group_by(farmer_id)%>%
-  mutate(plot_num = as.character(row_number()))%>%
-  arrange(farmer_id, plot_num)
-```
 
 ### Datasets
 
@@ -388,41 +445,27 @@ plot_data_additional
 
 ### Exercise 3a - Binding
 
-As the datasets for our additional data sets use the same formats that we have developed and our tidied up already. We can move straight to appending them onto our existing data frames.
-
-**HINT** For the following steps to work you should have the following dimensions for your data frames
-
-plot_data_long = 300 rows and 6 columns
-
-farmer_data = 100 rows and 9 variables
-
-Please use run the following code chunk to check the dimensions of your data
-
-The first number will be the number of rows, the second is the number of columns
-
-```{r ex3z, exercise = TRUE}
-dim(plot_data_long)
-
-dim(farmer_data)
-```
+As the datasets for our additional data sets which use the same formats that we have developed from our tidied up data.  We can move straight to appending them onto our existing data frames.
 
 Exercise 3a: Using `bind_rows`, append on the new observations to farmer_data and plot_data_long.
+
+**NOTE**: The cleaned version of the farmer data has been saved to a new object called `farmer_data_clean`. Please use this dataset instead of `farmer_data`
 
 ```{r ex3a, exercise = TRUE}
 farmer_data_full <- 
   
 plot_data_full
+
+dim(plot_data_full)
+
+dim(farmer_data_full)
 ```
 
 ```{r ex3a-solution}
-farmer_data_full <- bind_rows(farmer_data, farmer_data_additional)
+farmer_data_full <- bind_rows(farmer_data_clean, farmer_data_additional)
 
 plot_data_full <- bind_rows(plot_data_long, plot_data_additional)
-```
 
-You can use the following code chunk to see if you now have as many rows as you should expect.
-
-```{r ex3y, exercise = TRUE}
 dim(plot_data_full)
 
 dim(farmer_data_full)
@@ -445,6 +488,8 @@ plot_data_summary <- plot_data_full%>%
   group_by(farmer_id)%>%
   summarise(total_area = sum(area, na.rm = TRUE),
             nplots = n())
+
+plot_data_summary
 ```
 
 ### Exercise 3c - Joining data
