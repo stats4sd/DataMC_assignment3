@@ -210,6 +210,8 @@ You should have identified a few variables unfortunately using this code.
 
 Exercise 1bii: Using `mutate` and `na_if`, correct the variables that are still using `-9` so that these are instead coded as `NA`
 
+**NOTE** Please take note of how many variables you need to correct during this question. The answer will be part of the brief assessment quiz which will be used to register you for the module certificate.
+
 ```{r ex1bii, exercise = TRUE}
 farmer_data <- farmer_data %>%
   mutate()
@@ -381,7 +383,7 @@ Please include the `values_drop_na = TRUE` argument into your answer. This will 
 
 **Hint**: If you are stuck at all, look back at the session 2 workbook and how we utilised the special string of `".value"`.
 
-**HINT** For the following steps you can use `dim()` to check the number of rows and columns in your data to make sure you have the right amount.
+**NOTE** For the following steps you can use `dim()` to check the number of rows and columns in your data to make sure you have the right amount.  Please take note of how many rows are in the resulting data frame. The answer will be part of the brief assessment quiz which will be used to register you for the module certificate.
 
 ```{r ex2a, exercise = TRUE}
 plot_data_long <-plot_data%>%
@@ -451,6 +453,8 @@ As the datasets for our additional data sets which use the same formats that we 
 Exercise 3a: Using `bind_rows`, append on the new observations to farmer_data and plot_data_long.
 
 **NOTE**: The cleaned version of the farmer data has been saved to a new object called `farmer_data_clean`. Please use this dataset instead of `farmer_data`
+
+**NOTE** For the following steps you can use `dim()` to check the number of rows and columns in your data to make sure you have the right amount.  Please take note of how many rows are in the `farmer_data_full` data set. The answer will be part of the brief assessment quiz which will be used to register you for the module certificate.
 
 ```{r ex3a, exercise = TRUE}
 farmer_data_full <- 
