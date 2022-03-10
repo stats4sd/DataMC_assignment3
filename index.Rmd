@@ -131,15 +131,15 @@ farmer_data_clean <- farmer_data%>%
   gross_income = income-costs)%>%
   arrange(id)
 
-plot_data_summary <- plot_data_full%>%
-  group_by(farmer_id)%>%
-  summarise(total_area = sum(area, na.rm = TRUE),
-            nplots = n())
 
 farmer_data_full <- bind_rows(farmer_data_clean, farmer_data_additional)
 
 plot_data_full <- bind_rows(plot_data_long, plot_data_additional)
 
+plot_data_summary <- plot_data_full%>%
+  group_by(farmer_id)%>%
+  summarise(total_area = sum(area, na.rm = TRUE),
+            nplots = n())
 
 ```
 

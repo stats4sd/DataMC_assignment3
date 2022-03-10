@@ -214,6 +214,10 @@ code.</p>
 <p>Exercise 1bii: Using <code>mutate</code> and <code>na_if</code>,
 correct the variables that are still using <code>-9</code> so that these
 are instead coded as <code>NA</code></p>
+<p><strong>NOTE</strong> Please take note of how many variables you need
+to correct during this question. The answer will be part of the brief
+assessment quiz which will be used to register you for the module
+certificate.</p>
 <div class="tutorial-exercise" data-label="ex1bii" data-caption="Code"
 data-completion="1" data-diagnostics="1" data-startover="1"
 data-lines="0">
@@ -409,9 +413,12 @@ have as many rows as they will plots.</p>
 <p><strong>Hint</strong>: If you are stuck at all, look back at the
 session 2 workbook and how we utilised the special string of
 <code>".value"</code>.</p>
-<p><strong>HINT</strong> For the following steps you can use
+<p><strong>NOTE</strong> For the following steps you can use
 <code>dim()</code> to check the number of rows and columns in your data
-to make sure you have the right amount.</p>
+to make sure you have the right amount. Please take note of how many
+rows are in the resulting data frame. The answer will be part of the
+brief assessment quiz which will be used to register you for the module
+certificate.</p>
 <div class="tutorial-exercise" data-label="ex2a" data-caption="Code"
 data-completion="1" data-diagnostics="1" data-startover="1"
 data-lines="0">
@@ -495,6 +502,12 @@ observations to farmer_data and plot_data_long.</p>
 <p><strong>NOTE</strong>: The cleaned version of the farmer data has
 been saved to a new object called <code>farmer_data_clean</code>. Please
 use this dataset instead of <code>farmer_data</code></p>
+<p><strong>NOTE</strong> For the following steps you can use
+<code>dim()</code> to check the number of rows and columns in your data
+to make sure you have the right amount. Please take note of how many
+rows are in the <code>farmer_data_full</code> data set. The answer will
+be part of the brief assessment quiz which will be used to register you
+for the module certificate.</p>
 <div class="tutorial-exercise" data-label="ex3a" data-caption="Code"
 data-completion="1" data-diagnostics="1" data-startover="1"
 data-lines="0">
@@ -686,10 +699,6 @@ village_data_wide <- village_data%>%
     values_from = value
   )
 
-farmer_data_full <- bind_rows(farmer_data, farmer_data_additional)
-
-plot_data_full <- bind_rows(plot_data_long, plot_data_additional)
-
 farmer_data_clean <- farmer_data%>%
   mutate(name = trimws(name, which = "both"),
          hh_size = na_if(hh_size, -9),
@@ -702,6 +711,11 @@ farmer_data_clean <- farmer_data%>%
   age = ifelse(age == 180, 18, age),
   gross_income = income-costs)%>%
   arrange(id)
+
+
+farmer_data_full <- bind_rows(farmer_data_clean, farmer_data_additional)
+
+plot_data_full <- bind_rows(plot_data_long, plot_data_additional)
 
 plot_data_summary <- plot_data_full%>%
   group_by(farmer_id)%>%
