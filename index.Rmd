@@ -118,10 +118,6 @@ village_data_wide <- village_data%>%
     values_from = value
   )
 
-farmer_data_full <- bind_rows(farmer_data, farmer_data_additional)
-
-plot_data_full <- bind_rows(plot_data_long, plot_data_additional)
-
 farmer_data_clean <- farmer_data%>%
   mutate(name = trimws(name, which = "both"),
          hh_size = na_if(hh_size, -9),
@@ -139,6 +135,11 @@ plot_data_summary <- plot_data_full%>%
   group_by(farmer_id)%>%
   summarise(total_area = sum(area, na.rm = TRUE),
             nplots = n())
+
+farmer_data_full <- bind_rows(farmer_data_clean, farmer_data_additional)
+
+plot_data_full <- bind_rows(plot_data_long, plot_data_additional)
+
 
 ```
 
