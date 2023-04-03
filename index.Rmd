@@ -1,5 +1,5 @@
 ---
-title: "Module 3 - Assignment"
+title: "Ejercicio - Manejo de datos con R"
 output: 
   learnr::tutorial:
     progressive: true
@@ -143,31 +143,31 @@ plot_data_summary <- plot_data_full%>%
 
 ```
 
-## Part 1 - Data Cleaning
+## Parte 1 - Limpieza de datos
 
-### Dataset
+### Conjunto de datos
 
-To start with you will work on the following data set which contains a number of variables for a list of 100 farmers.
+Para empezar, trabajará con el siguiente conjunto de datos que contiene una serie de variables para una lista de 100 agricultores.
 
 ```{r, exercise = FALSE}
 farmer_data
 ```
 
-### Exercise 1a - Trim Whitespace
+### Ejercicio 1a - Recortar los espacios en blanco
 
-Let's start by checking for any whitespace, i suspect there may be some in our name column.
+Comencemos por verificar si hay espacios en blanco, sospecho que puede haber algunos en nuestra columna del nombre.
 
-Let's perform a check by using the `unique` function to look at all the unique values for name
+Realicemos una verificación usando la función `únique` (unico) para ver todos los valores únicos para el nombre
 
 ```{r, exercise = FALSE}
 unique(farmer_data$name)
 ```
 
-Seems our suspicions were correct, we have around 10 values for name that have either a leading or trailing space in them.
+Parece que nuestras sospechas eran correctas, tenemos alrededor de 10 valores para el nombre que tienen un espacio inicial o final de ellos.
 
-Exercise 1a: Using `mutate` and `trimws`, remove the whitespace present in the name column from both the beginning and the ending of the variable entries
+Ejercicio 1a: usando `mutate` y `trimws`, elimine el espacio en blanco presente en la columna de nombre tanto al principio como al final de los valores de las variables
 
-**REMEMBER** You can inspect the results of your changes at any time by writing the name of the data frame into the code chunk at any time
+**RECUERDE** Puede inspeccionar los resultados de sus cambios en cualquier momento escribiendo el nombre del marco de datos (data frame) en el fragmento de código 
 
 ```{r ex1a, exercise = TRUE}
 farmer_data <- farmer_data %>%
@@ -183,15 +183,15 @@ farmer_data <- farmer_data %>%
 unique(farmer_data$name)
 ```
 
-### Exercise 1b - Missing Data
+### Ejercicio 1b - Datos faltantes
 
-Recall that in R we need to be very explicit when it comes to defining data. It **MUST** be coded as `NA`
+Recuerde que en R necesitamos ser muy explícitos a la hora de definir datos. Los valores faltantes **DEBEN** ser codificados como `NA`
 
-In our dataset, we have unfortunately not told R explicitly what our missing data codes were when we imported the data. Therefore, there are a few variables which have some values equalling -9. However this was a missing data code, but R will see this value as literally -9.
+En nuestro conjunto de datos, lamentablemente no le hemos dicho a R explícitamente cuáles eran nuestros códigos de datos faltantes cuando importamos los datos. Por lo tanto, hay algunas variables que tienen algunos valores igual a -9. Sin embargo, este era un código para datos faltantes, pero R entenderá este valor como literalmente -9.
 
-Let's check first which variables this issue applies to.
+Veamos primero en qué variables tenemos este problema.
 
-Exercise 1bi: Use `summary` to check which continuous variables in the dataset are still using the missing data code `-9` rather than being explicitly `NA`. Note that -9 will be the minimum value in each of these cases.
+Ejercicio 1bi: use `summary` para verificar qué variables continuas en el conjunto de datos todavía usan el código de datos faltante `-9` en lugar de ser explícitamente `NA`. Tenga en cuenta que -9 será el valor mínimo en cada uno de estos casos.
 
 ```{r ex1bi, exercise = TRUE}
 
@@ -203,14 +203,14 @@ summary(farmer_data)
 
 farmer_data
 
-# Should have found that at least 1 value in each of hh_size, income and costs were equal to -9
+# Debería haber encontrado que al menos 1 valor en cada una de las variables de hh_size, income y costs era igual a -9
 ```
 
-You should have identified a few variables unfortunately using this code.
+Debería haber identificado algunas variables que estan usando este código.
 
-Exercise 1bii: Using `mutate` and `na_if`, correct the variables that are still using `-9` so that these are instead coded as `NA`
+Ejercicio 1bii: usando `mutate` y `na_if`, corrija las variables que todavia usan `-9` para que en su lugar se codifiquen como `NA`
 
-**NOTE** Please take note of how many variables you need to correct during this question. The answer will be part of the brief assessment quiz which will be used to register you for the module certificate.
+**NOTA** Tome nota de cuántas variables necesita corregir durante esta pregunta. La respuesta formará parte del breve cuestionario de evaluación que se utilizará para inscribirlo en el certificado del módulo.
 
 ```{r ex1bii, exercise = TRUE}
 farmer_data <- farmer_data %>%
@@ -234,28 +234,29 @@ farmer_data <- farmer_data %>%
 
 summary(farmer_data)
 
-#This would only be useful if -9 will ALWAYS be a missing code and never a true value of a variable
+#Esto solo sería útil si -9 SIEMPRE será un código para valores faltantes y NUNCA un valor verdadero de una variable
 
-#Recommend looking into mutate_at or mutate_if to see how you can make the same edit across multiple but not all columns
+#Se recomienda mirar en mutate_at o mutate_if para ver cómo puede hacer la misma edición en varias columnas, pero no en todas.
+
 ```
 
-### Exercise 1c - Correcting labels
+### Ejercicio 1c - Corrección de etiquetas
 
-Now something else looked off about our sex variable. Let's use `unique` to have a look at all of the unique values of sex
+Algo más se veía mal en nuestra variable sexo. Usemos `unique` para echar un vistazo a todos los valores únicos del sexo.
 
 ```{r, exercise = FALSE}
 unique(farmer_data$sex)
 ```
 
-Hmm, seems we have multiple values to mean the same thing unfortunately. Male and Female have both been coded four different ways each.
+Hmm, lamentablemente parece que tenemos múltiples valores para lo mismo. Hombre y Mujer han sido codificados de cuatro maneras diferentes cada uno.
 
-Exercise 1c: Using `mutate` and `case_when`, standardise the sex variable such that
+Ejercicio 1c: Usando `mutate` y `case_when`, estandarice la variable sexo de tal manera que
 
-Male, m, M & "1" are all recoded to equal "Male"
+Male, m, M y "1" se recodifican como "Male"
 
-Female, f, F & "2" are all recoded to equal "Female"
+Female, f, F y "2" se recodifican como "Female"
 
-**Hint** Think back to how we used the `%in%` operator
+**Pista** Piense en cómo usamos el operador `%in%`
 
 ```{r ex1c, exercise = TRUE}
 farmer_data <- farmer_data %>%
@@ -272,30 +273,29 @@ farmer_data <- farmer_data %>%
 table(farmer_data$sex)
 ```
 
-### Exercise 1d - Correcting outlier values
+### Ejercicio 1d - Corrección de valores atípicos
 
-Let's use a histogram to inspect one of our continuous variables for possible data entry errors
+Usemos un histograma para inspeccionar una de nuestras variables continuas en busca de posibles errores de entrada de datos
 
 ```{r}
 hist(farmer_data$age)
 ```
 
-Looks like we have one implausibly high outlying value for age.
+Parece que tenemos un valor atípico inverosímilmente alto para la edad.
 
-Upon contacting the enumerator who collected data for this farmer, you find the true value was meant to be 18 years It was just inputted wrongly.
+Al ponerse en contacto con el enumerador que recopiló los datos de este agricultor, descubre que el valor real era 18 años. Simplemente se ingresó incorrectamente.
 
-Exercise 1d: Using any method demonstrated in the workbook, correct this implausibly high value of 180 years old to the correct value of 18 years old.
+Ejercicio 1d: usando cualquier método mostrado en el libro de trabajo, corrija este valor inverosímilmente alto de 180 años al valor correcto de 18 años.
 
 ```{r ex1d, exercise = TRUE}
 
 ```
 
-Remember you can use the histogram to again plot the value and check your changes
+Recuerde que puede usar el histograma para graficar el valor y verificar sus cambios
 
 ```{r ex1db, exercise = TRUE}
 hist(farmer_data$age)
 ```
-
 
 ```{r ex1d-solution}
 farmer_data$age[farmer_data$age == 180] <- 19
@@ -304,13 +304,13 @@ farmer_data$age[farmer_data$age == 180] <- 19
 
 farmer_data <- farmer_data%>%
   mutate(age = ifelse(age == 180, 18, age))
-```
+``` 
 
-### Exercise 1e - Creating a new variable
+### Ejercicio 1e - Crear una nueva variable
 
-As part of the data analysis plan you notice that part of the analysis will include an evaluation of the gross income of farmers, a calculation of income minus costs. However, you find this was not calculated directly as part of the data collection.
+Como parte del plan de análisis de datos, se puede ver que parte del análisis incluirá una evaluación de los ingresos brutos de los agricultores, un cálculo de los ingresos menos los costos. Sin embargo, descubre que esto no se calculó directamente como parte de la recopilación de datos.
 
-Exercise 1e: Using `mutate` create a new variable called `gross_income` which is the income minus the costs.
+Ejercicio 1e: usando `mutate` cree una nueva variable llamada `gross_income` que es el ingreso menos los costos.
 
 ```{r ex1e, exercise = TRUE}
 
@@ -323,13 +323,13 @@ farmer_data <- farmer_data%>%
 farmer_data$gross_income
 ```
 
-### Exercise 1f - Sorting data
+### Ejercicio 1f - Clasificación de datos
 
-Finally, you may have noticed that there is currently no particular order to our data. While not mandatory, sorting data can be useful for presentation, readability and help users easily find certain pieces of information.
+Finalmente, es posible que haya notado que actualmente no hay un orden particular para nuestros datos. Si bien no es obligatorio, ordenar los datos puede ser útil para la presentación, la legibilidad y ayudar a los usuarios a encontrar fácilmente cierta información.
 
-We have a natural sorting variable in our unique identifier "id"
+Tenemos una variable de clasificación natural en nuestro identificador único "id"
 
-Exercise 1f: Using `arrange`, sort the data using the id variable so that the rows are in order from 1 to 100 by id.
+Ejercicio 1f: Usando `arrange`, ordene los datos usando la variable id para que las filas estén en orden del 1 al 100 por id.
 
 ```{r ex1f, exercise = TRUE}
 
@@ -355,35 +355,35 @@ farmer_data <- farmer_data%>%
   arrange(id)
 ```
 
-## Part 2 - Data Reshaping
+## Parte 2: Remodelación de los datos
 
-### Datasets
+### Conjuntos de datos
 
-Before we test your skills in pivoting data, let’s look at some additional data we have for this project. It is at the level of the plot while our previous dataset was at the level of the farmer. 
+Antes de probar sus habilidades para pivotar datos, veamos algunos datos adicionales que tenemos para este proyecto. Son datos al nivel de parcela, mientras que nuestro conjunto de datos anterior estaba a nivel del agricultor.
 
-Each farmer can have up to 8 plots, they are labelled id_1, id_2 and so on. You will notice that many of the values in these columns are NA as the farmers do not all have this many plots.`
+Cada agricultor puede tener hasta 8 parcelas, están etiquetadas como id_1, id_2 y así sucesivamente. Notará que muchos de los valores en estas columnas son NA ya que no todos los agricultores tienen tantas parcelas.
 
 ```{r}
 plot_data
 ```
 
-Secondly, you have been provided by an outside source with some data about the villages that have been used in this project. However, it has unfortunately been passed along in long format with individual rows for the villages' population, sampling weights and whether or not they received support from an NGO.
+En segundo lugar, una fuente externa le ha proporcionado algunos datos sobre los municipios que se han utilizado en este proyecto. Sin embargo, lamentablemente se ha transmitido en formato largo con filas individuales para la población de municipios, los pesos de muestreo y si recibieron o no apoyo de una ONG.
 
 ```{r}
 village_data
 ```
 
-### Exercise 2a - Pivot longer
+### Ejercicio 2a - Pivote a datos en formato largo
 
-Firstly, let's get our plot data into a more useful shape. When conducting analysis it will be much simpler to keep comparable information into the same column. i.e keep all values for the area of plot in just the single column.
+En primer lugar, pongamos los datos de parcela en una forma más útil. Al realizar un análisis, será mucho más sencillo mantener información comparable en la misma columna. Es decir, mantener todos los valores para el área de la parcela en una sola columna.
 
-Exercise 2a: Using `pivot_longer` reshape the wide plot data into a new long data set, save this output as `plot_data_long` and call the new variable, that will list the plot number within a farmer, "plot_num". 
+Ejercicio 2a: usando `pivot_longer` remodele los datos en formato ancho de la parcela en un nuevo conjunto de datos largos, guarde esta salida como `plot_data_long` y llame a la nueva variable, que mostrará el número de parcela dentro de un agricultor, "plot_num".
 
-Please include the `values_drop_na = TRUE` argument into your answer. This will stop unnecessary rows being created for where all variables will be `NA`. In other words, all farmers will only have as many rows as they will plots.
+Incluya el argumento `values_drop_na = TRUE` en su respuesta. Esto evitará que se creen filas innecesarias donde todas las variables serán `NA`. En otras palabras, solo tendremos para cada agricultor tantas lineas de datos como parcelas tenga.
 
-**Hint**: If you are stuck at all, look back at the session 2 workbook and how we utilised the special string of `".value"`.
+**Sugerencia**: si se queda atascado, vuelva a consultar el libro de trabajo de la sesión 2 y cómo utilizamos la cadena especial `".value"`.
 
-**NOTE** For the following steps you can use `dim()` to check the number of rows and columns in your data to make sure you have the right amount.  Please take note of how many rows are in the resulting data frame. The answer will be part of the brief assessment quiz which will be used to register you for the module certificate.
+**NOTA** Para los siguientes pasos, puede usar `dim()` para verificar la cantidad de filas y columnas en sus datos y asi asegurarse de tener la cantidad correcta. Tome nota de cuántas filas hay en el marco de datos resultante. La respuesta formará parte del breve cuestionario de evaluación que se utilizará para inscribirlo en el certificado del módulo.
 
 ```{r ex2a, exercise = TRUE}
 plot_data_long <-plot_data%>%
@@ -407,12 +407,11 @@ dim(plot_data_long)
 ```
 
 
-### Exercise 2b - Pivot wider
+### Ejercicio 2b - Pivote a datos en formato ancho
 
-Next let's do the opposite to that village data.
+A continuación, hagamos lo contrario con los datos de ese municipio.
 
-Exercise 2b: Using `pivot_wider`, transform the data into wide format such that you only have one row per village. Save this to a new object titled `village_data_wide`
-
+Ejercicio 2b: usando `pivot_wider`, transforme los datos en formato ancho de modo que solo tenga una fila por municipio. Guarde estos datos en un nuevo objeto con nombre `village_data_wide`
 
 
 ```{r ex2b, exercise = TRUE}
@@ -432,11 +431,11 @@ village_data_wide
 dim(village_data_wide)
 ```
 
-## Part 3 - Data Merging
+## Parte 3 - Unión de datos
 
-### Datasets
+### Conjuntos de datos
 
-For the first exercise of this final section, we are going to bind our previous data sets with some additional observations for our farmers and plots. 20 new farmers with 45 plots between them.
+Para el primer ejercicio de esta sección final, uniremos nuestros conjuntos de datos anteriores con algunas observaciones adicionales sobre nuestros agricultores y parcelas. 20 nuevos agricultores con 45 parcelas entre todos ellos.
 
 ```{r}
 farmer_data_additional
@@ -446,15 +445,15 @@ farmer_data_additional
 plot_data_additional
 ```
 
-### Exercise 3a - Binding
+### Ejercicio 3a - Union de conjuntos de datos
 
-As the datasets for our additional data sets which use the same formats that we have developed from our tidied up data.  We can move straight to appending them onto our existing data frames.
+Los conjuntos de datos adicionales utilizan los mismos formatos que hemos desarrollado a partir de nuestros datos ordenados. Podemos pasar directamente a agregarlos a nuestros marcos de datos existentes.
 
-Exercise 3a: Using `bind_rows`, append on the new observations to farmer_data and plot_data_long.
+Ejercicio 3a: usando `bind_rows`, agregue las nuevas observaciones a farmer_data y plot_data_long.
 
-**NOTE**: The cleaned version of the farmer data has been saved to a new object called `farmer_data_clean`. Please use this dataset instead of `farmer_data`
+**NOTA**: La versión limpia de los datos del agricultor se guardó en un nuevo objeto llamado `farmer_data_clean`. Utilice este conjunto de datos en lugar de `farmer_data`
 
-**NOTE** For the following steps you can use `dim()` to check the number of rows and columns in your data to make sure you have the right amount.  Please take note of how many rows are in the `farmer_data_full` data set. The answer will be part of the brief assessment quiz which will be used to register you for the module certificate.
+**NOTA** Para los siguientes pasos, puede usar `dim()` para verificar la cantidad de filas y columnas en sus datos para asegurarse de tener la cantidad correcta. Tome nota de cuántas filas hay en el conjunto de datos `farmer_data_full`. La respuesta formará parte del breve cuestionario de evaluación que se utilizará para inscribirlo en el certificado del módulo.
 
 ```{r ex3a, exercise = TRUE}
 farmer_data_full <- 
@@ -476,13 +475,13 @@ dim(plot_data_full)
 dim(farmer_data_full)
 ```
 
-### Exercise 3b - Summarising
+### Ejercicio 3b - Resumen de los datos
 
-Now we will move onto first summarising some data from a lower level to then then join it up with data at a higher level.
+Ahora pasaremos a resumir primero algunos datos de un nivel inferior para luego unirlos con datos de un nivel superior.
 
-So as part of our data analysis plan we need a total farm area which is the sum of the individual plot areas for each individual farmer. We then want to merge this with our farmer data set.
-
-Exercise 3b: Using `group_by` and `summarise`, create a new data set which is a summary of the plot level data. Call this `plot_data_summary`. Create summary variables for the total area of a farmer's plots using `sum` and then also create a variable which counts the number of plots a farmer owns.
+Como parte de nuestro plan de análisis de datos, necesitamos el área total de las fincas por agricultor, que es la suma de las áreas de las parcelas individuales de cada agricultor individual. Queremos luego fusionar esto con nuestro conjunto de datos de agricultores.
+ 
+Ejercicio 3b: usando `group_by` y `summarise`, cree un nuevo conjunto de datos que sea un resumen de los datos a nivel de parcela. Dele el nombre de `plot_data_summary`. Cree variables de resumen para el área total de las parcelas de un agricultor utilizando `sum` y luego cree también una variable que cuente el número de parcelas que posee un agricultor.
 
 ```{r ex3b, exercise = TRUE}
 plot_data_summary <- plot_data_full%>%
@@ -497,13 +496,13 @@ plot_data_summary <- plot_data_full%>%
 plot_data_summary
 ```
 
-### Exercise 3c - Joining data
+### Ejercicio 3c - Fusión de datos
 
-Join the plot_data_summary data set onto the farmer_data_full dataset. Now we actually have a few farmers who we have no plot data available. We have made the decision for analysis that we only want farmers who own at least one plot.
+Fusione el conjunto de datos plot_data_summary con el conjunto de datos farmer_data_full. Ahora tenemos algunos agricultores de los que no tenemos datos de parcela disponibles. Hemos tomado la decisión para el análisis de que solo queremos agricultores que posean al menos una parcela.
 
-Exercise 3c: Using a type of join that will only keep the farmers who have plot data that they can be matched to, join plot_data_summary onto farmer_data_full. 
+Ejercicio 3c: Usando un tipo de fusión que solo mantendrá a los agricultores que tienen datos de parcela con los que se la pueda relacionar, fusione plot_data_summary con farmer_data_full.
 
-**HINT** Remember that you can use `c()` to match variables where they have different names in the two datasets
+**SUGERENCIA** Recuerda que puede usar `c()` para unir variables donde tienen nombres diferentes en los dos conjuntos de datos
 
 ```{r ex3c, exercise = TRUE}
 farmer_data_full <- 
@@ -515,6 +514,7 @@ farmer_data_full <- inner_join(
 )
 ```
 
-Thank you for completing this assignment.
+Gracias por completar esta tarea.
 
-Please now go to the Module 3 quiz where you will be asked a couple questions about the assignment. This quiz will be used to mark completion of the module. Once you have completed the quiz, you can expect to receive your certificate within a few working days.
+Ahora vaya al cuestionario del Módulo 3, donde se le harán un par de preguntas sobre la tarea. Este cuestionario se utilizará para indicar la finalización del módulo. Una vez que haya completado el cuestionario, puede esperar recibir su certificado dentro de unos días hábiles.
+
