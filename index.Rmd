@@ -3,6 +3,7 @@ title: "Ejercicio - Manejo de datos con R"
 output: 
   learnr::tutorial:
     progressive: true
+    language: es
     allow_skip: true
     df_print: paged
 runtime: shiny_prerendered
