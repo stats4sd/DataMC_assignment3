@@ -1,5 +1,5 @@
 ---
-title: "Module 3 - Assignment"
+title: "Data Management - Exercises"
 output: 
   learnr::tutorial:
     progressive: true
