@@ -210,8 +210,6 @@ You should have identified a few variables unfortunately using this code.
 
 Exercise 1bii: Using `mutate` and `na_if`, correct the variables that are still using `-9` so that these are instead coded as `NA`
 
-**NOTE** Please take note of how many variables you need to correct during this question. The answer will be part of the brief assessment quiz which will be used to register you for the module certificate.
-
 ```{r ex1bii, exercise = TRUE}
 farmer_data <- farmer_data %>%
   mutate()
@@ -224,13 +222,6 @@ farmer_data <- farmer_data %>%
   mutate(hh_size = na_if(hh_size, -9),
          income = na_if(income, -9),
          costs = na_if(costs, -9))
-
-summary(farmer_data)
-
-# OR
-
-farmer_data <- farmer_data %>%
-  mutate_all(na_if, -9)
 
 summary(farmer_data)
 
@@ -287,15 +278,10 @@ Upon contacting the enumerator who collected data for this farmer, you find the 
 Exercise 1d: Using any method demonstrated in the workbook, correct this implausibly high value of 180 years old to the correct value of 18 years old.
 
 ```{r ex1d, exercise = TRUE}
+???
 
-```
-
-Remember you can use the histogram to again plot the value and check your changes
-
-```{r ex1db, exercise = TRUE}
 hist(farmer_data$age)
 ```
-
 
 ```{r ex1d-solution}
 farmer_data$age[farmer_data$age == 180] <- 19
@@ -304,6 +290,8 @@ farmer_data$age[farmer_data$age == 180] <- 19
 
 farmer_data <- farmer_data%>%
   mutate(age = ifelse(age == 180, 18, age))
+
+hist(farmer_data$age)
 ```
 
 ### Exercise 1e - Creating a new variable
@@ -320,7 +308,7 @@ Exercise 1e: Using `mutate` create a new variable called `gross_income` which is
 farmer_data <- farmer_data%>%
   mutate(gross_income = income-costs)
 
-farmer_data$gross_income
+farmer_data
 ```
 
 ### Exercise 1f - Sorting data
@@ -338,6 +326,8 @@ Exercise 1f: Using `arrange`, sort the data using the id variable so that the ro
 ```{r ex1f-solution}
 farmer_data <- farmer_data%>%
   arrange(id)
+
+farmer_data
 ```
 
 ```{r, echo = FALSE}
@@ -383,8 +373,6 @@ Please include the `values_drop_na = TRUE` argument into your answer. This will 
 
 **Hint**: If you are stuck at all, look back at the session 2 workbook and how we utilised the special string of `".value"`.
 
-**NOTE** For the following steps you can use `dim()` to check the number of rows and columns in your data to make sure you have the right amount.  Please take note of how many rows are in the resulting data frame. The answer will be part of the brief assessment quiz which will be used to register you for the module certificate.
-
 ```{r ex2a, exercise = TRUE}
 plot_data_long <-plot_data%>%
   pivot_longer(
@@ -402,8 +390,6 @@ plot_data_long <-plot_data%>%
   )
 
 plot_data_long
-
-dim(plot_data_long)
 ```
 
 
@@ -412,8 +398,6 @@ dim(plot_data_long)
 Next let's do the opposite to that village data.
 
 Exercise 2b: Using `pivot_wider`, transform the data into wide format such that you only have one row per village. Save this to a new object titled `village_data_wide`
-
-
 
 ```{r ex2b, exercise = TRUE}
 village_data_wide <- village_data%>%
@@ -428,8 +412,6 @@ village_data_wide <- village_data%>%
   )
 
 village_data_wide
-
-dim(village_data_wide)
 ```
 
 ## Part 3 - Data Merging
@@ -454,26 +436,32 @@ Exercise 3a: Using `bind_rows`, append on the new observations to farmer_data an
 
 **NOTE**: The cleaned version of the farmer data has been saved to a new object called `farmer_data_clean`. Please use this dataset instead of `farmer_data`
 
-**NOTE** For the following steps you can use `dim()` to check the number of rows and columns in your data to make sure you have the right amount.  Please take note of how many rows are in the `farmer_data_full` data set. The answer will be part of the brief assessment quiz which will be used to register you for the module certificate.
+Farmer Data
 
-```{r ex3a, exercise = TRUE}
-farmer_data_full <- 
+```{r ex3ai, exercise = TRUE}
+farmer_data_full <- ???
   
-plot_data_full
-
-dim(plot_data_full)
-
-dim(farmer_data_full)
+farmer_data_full
 ```
 
-```{r ex3a-solution}
+```{r ex3ai-solution}
 farmer_data_full <- bind_rows(farmer_data_clean, farmer_data_additional)
 
+farmer_data_full
+```
+
+Plot Data
+
+```{r ex3aii, exercise = TRUE}
+plot_data_full <- ???
+  
+plot_data_full
+```
+
+```{r ex3aii-solution}
 plot_data_full <- bind_rows(plot_data_long, plot_data_additional)
 
-dim(plot_data_full)
-
-dim(farmer_data_full)
+plot_data_full
 ```
 
 ### Exercise 3b - Summarising
@@ -515,6 +503,3 @@ farmer_data_full <- inner_join(
 )
 ```
 
-Thank you for completing this assignment.
-
-Please now go to the Module 3 quiz where you will be asked a couple questions about the assignment. This quiz will be used to mark completion of the module. Once you have completed the quiz, you can expect to receive your certificate within a few working days.
