@@ -143,6 +143,16 @@ plot_data_summary <- plot_data_full%>%
 
 ```
 
+## Overview
+
+This set of exercises helps to test your sills from each of our three tutorials from our data management module.
+
+You can review the tutorials for assistance at any time here
+
+*   [Tidy Data](https://shiny.stats4sd.org/DataMC_Tidy_Data__self_led/)
+*   [Long vs Wide Data](https://shiny.stats4sd.org/DataMC_Long_Wide__self_led/)
+*   [Relational Data](https://shiny.stats4sd.org/DataMC_Relational_Data__self_led/)
+
 ## Part 1 - Data Cleaning
 
 ### Dataset
